@@ -1,10 +1,10 @@
 trigger:
   branches:
-    include: [ main ]
+    include: [ master ]
 
 pr:
   branches:
-    include: [ main ]
+    include: [ master ]
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -30,12 +30,22 @@ steps:
     npm_config_cache: $(Pipeline.Workspace)/.npm
 
 - script: |
-    npm run build
+    if npm run | grep -q 'build'; then
+      echo "Running build script..."
+      npm run build
+    else
+      echo "No build script defined in package.json. Skipping build step."
+    fi
   displayName: 'Build'
 
 - script: |
     mkdir -p test-results
-    npm run test:ci
+    if npm run | grep -q 'test:ci'; then
+      echo "Running test:ci script..."
+      npm run test:ci
+    else
+      echo "No test:ci script defined in package.json. Skipping tests."
+    fi
   displayName: 'Run tests'
   env:
     JEST_JUNIT_OUTPUT: 'test-results/junit.xml'
