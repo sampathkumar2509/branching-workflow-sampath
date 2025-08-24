@@ -1,0 +1,21 @@
+The push refers to repository [sampathacr2025.azurecr.io/docker-sample-app]
+06ccb29f6586: Preparing
+9090c5578248: Preparing
+af6a173746b7: Preparing
+e3c5d60680dd: Preparing
+82140d9a70a7: Preparing
+f3b40b0cdb1c: Preparing
+0b1f26057bd0: Preparing
+08000c18d16d: Preparing
+f3b40b0cdb1c: Waiting
+0b1f26057bd0: Waiting
+08000c18d16d: Waiting
+af6a173746b7: Pushed
+06ccb29f6586: Pushed
+e3c5d60680dd: Pushed
+82140d9a70a7: Pushed
+9090c5578248: Pushed
+f3b40b0cdb1c: Pushed
+08000c18d16d: Pushed
+0b1f26057bd0: Pushed
+v1: digest: sha256:17fcb7e82a41dcfadcfb549e83ba337b8b2fad309612114f387e05d52c71d9d4 size: 1989
