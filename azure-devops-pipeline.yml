@@ -1,0 +1,79 @@
+trigger:
+  branches:
+    include: [ master ]
+
+pr:
+  branches:
+    include: [ master ]
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  displayName: 'Use Node.js 18.x'
+  inputs:
+    versionSpec: '18.x'
+
+- task: Cache@2
+  displayName: 'Cache npm'
+  inputs:
+    key: 'npm | "$(Agent.OS)" | package-lock.json'
+    restoreKeys: |
+      npm | "$(Agent.OS)"
+    path: '$(Pipeline.Workspace)/.npm'
+
+- script: |
+    npm ci
+  displayName: 'Install dependencies'
+  env:
+    npm_config_cache: $(Pipeline.Workspace)/.npm
+
+- script: |
+    if npm run | grep -q 'build'; then
+      echo "Running build script..."
+      npm run build
+    else
+      echo "No build script defined in package.json. Skipping build step."
+    fi
+  displayName: 'Build'
+
+- script: |
+    mkdir -p test-results
+    if npm run | grep -q 'test:ci'; then
+      echo "Running test:ci script..."
+      npm run test:ci
+    else
+      echo "No test:ci script defined in package.json. Skipping tests."
+    fi
+  displayName: 'Run tests'
+  env:
+    JEST_JUNIT_OUTPUT: 'test-results/junit.xml'
+
+- task: PublishTestResults@2
+  displayName: 'Publish test results'
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: 'test-results/*.xml'
+    failTaskOnFailedTests: true
+
+- task: PublishCodeCoverageResults@2
+  displayName: 'Publish code coverage'
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: 'coverage/cobertura-coverage.xml'
+    reportDirectory: 'coverage'
+    failIfCoverageEmpty: false
+
+- script: |
+    mkdir -p $(Build.ArtifactStagingDirectory)/app
+    cp -r . $(Build.ArtifactStagingDirectory)/app/
+  displayName: 'Stage artifacts'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish artifact: drop'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
